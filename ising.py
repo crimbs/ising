@@ -6,3 +6,5 @@ Created on Sat Mar 16 13:21:48 2019
 @author: christianhines
 """
 
+def square(x):
+    return x*x
