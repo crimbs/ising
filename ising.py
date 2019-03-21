@@ -2,40 +2,32 @@
 # date: March 2019
 # ising.py
 import numpy as np
-
-np.random.seed(seed=1234)
-#alternative_random_gen = [-1,1][np.random.randint(2)]
+import time
+start = time. time()
 
 # Define global variables
-N = 31
-T = 300     # Temperature [K]
-k = 1       # Boltzmann's Constant
+N = 8                           # N x N lattice sites
+T = 1                           # Temperature [K]
+num_steps = 10**3               # Number of time steps
 
 # Initialisation
-a = np.random.randint(2, size=(N,N))
-lattice = np.where(a==0, -1, a)
+lattice = np.int8(np.random.choice([1, -1], size=(N, N)))
 
-def E(i,j):
-    '''Returns the energy at the i,jth site'''
-    return lattice[((i - 1) % N), j] + lattice[((i + 1) % N), j] + \
-                    lattice[i, ((j - 1) % N)] + lattice[i, ((j + 1) % N)]
-
-E_Total = 0
-for i in range(N):
-    for j in range(N):
-        E_Total += E(i,j)
-
-whatis = lattice[1,1]
-also = E(1,1)
-#lattice[1,1] = -lattice[1,1]
-
-E_new = 0
-for i in range(N):
-    for j in range(N):
-        E_new += E(i,j)
-'''
-if E_new >= E_Total:
-    P = np.exp(-(1/(k*T))*(E_new - E_Total))
-    if np.random.rand() >= P:
-        lattice[0,1] = -lattice[0,1]
-    '''
+# Metropolis-Hastings Algorithm
+for step in range(num_steps):
+    
+    for k in range(N**2):
+        
+        i, j = np.random.randint(N), np.random.randint(N)
+    
+        dE = lattice[i,j] * lattice[((i - 1) % N), j] + \
+            lattice[((i + 1) % N), j] + \
+            lattice[i, ((j - 1) % N)] + \
+            lattice[i, ((j + 1) % N)]
+            
+        if dE < 0 or np.exp(-dE/T) > np.random.rand():
+            lattice[i, j] = -lattice[i, j]
+   
+         
+end = time. time()
+print(end - start)
