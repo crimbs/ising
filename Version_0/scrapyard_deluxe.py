@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 # Define global variables
 N = 4                           # N x N lattice sites
 
@@ -45,3 +45,12 @@ testo = energy_of_site(lattic, *i)
 #plt.plot(T_array,west,'.')
 #from matplotlib2tikz import save as tikz_save
 #tikz_save('crit_temp.tex', figurewidth='\linewidth')
+
+bigness = 10**4
+
+oneway = np.random.rand(10)
+
+def anotherway():
+    for i in range(bigness):
+        return (np.random.rand())
+

@@ -1,69 +1,56 @@
 import numpy as np
-import time
-#import matplotlib.pyplot as plt
-start = time.time()
 
-# Define global variables
-N = 4                           # N x N lattice sites
-T = 1                           # Temperature [J/k_B]
-num_steps = 10**1               # Number of time steps
-time_step = N**2
-total_steps = num_steps * time_step
 
-# Initialisation of lattice
-lattice = np.random.choice([1, -1], size=(N, N))
+def energy_required_to_flip(lattice, N, i, j):
+    '''
+    Energy required to flip the spin of an individual spin site (i, j)
+    '''
+    energy_of_site = -1 * lattice[i][j] * (lattice[((i - 1) % N)][j]
+                                           + lattice[((i + 1) % N)][j]
+                                           + lattice[i][((j - 1) % N)]
+                                           + lattice[i][((j + 1) % N)])
+    return -2 * energy_of_site
 
-# Initialisation of random variables outside of loops
-lattice_picker = np.random.randint(N, size=(total_steps, 2))
-boltzmann_picker = np.random.rand(total_steps)
 
-# Energy of individual spin site (i, j) using 2d Ising Model with J=1
-def energy_of_site(i, j):
-    return -1 * lattice[i, j] * (lattice[((i - 1) % N), j]
-                                 + lattice[((i + 1) % N), j]
-                                 + lattice[i, ((j - 1) % N)]
-                                 + lattice[i, ((j + 1) % N)])
+def flip_spin(lattice, i, j):
+    '''
+    Flips the direction of the spin of an individual spin site (i, j)
+    '''
+    lattice[i][j] = -lattice[i][j]
+    return lattice[i][j]
 
-# Energy required to flip the spin of an individual spin site (i, j)
-def energy_required_to_flip(i, j):
-    return -2 * energy_of_site(i, j)
 
-# Flips the direction of the spin of an individual spin site (i, j)
-def flip_spin(i, j):
-    lattice[i, j] = -lattice[i, j]
-    return lattice[i, j]
-
-def energy():
-    return -1 * lattice * (np.roll(lattice, -1, 0)
-                           + np.roll(lattice, +1, 0)
-                           + np.roll(lattice, -1, 1)
-                           + np.roll(lattice, +1, 1))
-    
-#--------Thermodynamic quantities----------#
-    
-def M():
+def M(lattice):
+    '''
+    Returns total magnetisation of the system
+    '''
     return np.sum(lattice)
 
-def M_av():
-    return np.mean(lattice)
 
-def E():
-    return np.sum(energy())
+def E(lattice):
+    '''
+    Returns total energy of the system
+    '''
+    energy_array = -1 * lattice * (np.roll(lattice, -1, 0)
+                                   + np.roll(lattice, +1, 0)
+                                   + np.roll(lattice, -1, 1)
+                                   + np.roll(lattice, +1, 1))
+    return np.sum(energy_array)
 
-def E_av():
-    return np.mean(energy())
 
-#----------MAIN---------------#
+def main(N=4, T=1, nsteps=10**2):
+    '''
+    Returns the two-dimensional array [Magnetisation,Energy]
+    '''
+    # Initialisation of lattice
+    lattice = np.random.choice([1, -1], size=(N, N))
 
-def main():
-    for step in range(total_steps):
-        i = tuple(lattice_picker[step])
-        dE = energy_required_to_flip(*i)
-        if dE < 0 or np.exp(-dE / T) > boltzmann_picker[step]:
-            flip_spin(*i)
-    return M(), M_av(), E(), E_av()
-    
-wuel = main()
+    def metropolis():
+        for step in range(N**2):
+            i = np.random.randint(N, size=(2))
+            dE = energy_required_to_flip(lattice, N, *i)
+            if dE < 0 or np.exp(-dE / T) > np.random.rand():
+                flip_spin(lattice, *i)
 
-end = time.time()
-print(end - start)
+        return M(lattice), E(lattice)
+    return np.array([metropolis() for step in range(nsteps)]).T
