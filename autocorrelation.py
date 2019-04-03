@@ -1,12 +1,12 @@
-# author: Christian Hines
+# author: Ollie Hines
 # date: March 2019
 # autocorrelation.py
 import numpy as np
-from ising_class import Ising
 import time
 import matplotlib.pyplot as plt
-start = time. time()
+start = time.time()
 
+# Define autocorrelation function
 def ACF(x,max_lag):
     x = np.array(x)
     N = len(x)
@@ -19,7 +19,8 @@ def ACF(x,max_lag):
         out += [sum((x[lag:] - Mbar)*(x[:(N-lag)] - Mbar)/((N-lag-1)*A0))]
     
     plt.bar(range(0,max_lag),out)
-    
+
+# Create normally distributed array
 x = np.random.randn(1)
 
 i = 1
@@ -27,9 +28,12 @@ while i <100:
     xnew = list(x[-1]+ np.random.randn(1))
     x = np.array(list(x)+xnew)
     i += 1
-  
+
+# Random walks plot
 plt.figure()
-plt.plot(x)   
+plt.plot(x)
+
+# ACF plot   
 plt.figure()
 ACF(x,50)
 

@@ -8,11 +8,15 @@ import matplotlib.pyplot as plt
 start = time.time()
 
 def metropolis_scaler(i):
-    return Ising(T=i).magnetisation()
+    return Ising(N=4,num_steps=10**3,T=i).magnetisation()
 vmetropolis = np.vectorize(metropolis_scaler)
 
-T_array = np.linspace(0.001,10,num=20)
+T_array = np.linspace(0.0001,6,num=20)
 
 y = vmetropolis(T_array)
 
-plt.plot(T_array,y)
+
+plt.plot(T_array,y,'o')
+
+end = time.time()
+print(end - start)
