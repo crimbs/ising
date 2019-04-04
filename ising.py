@@ -98,7 +98,7 @@ def main(
             return M(evolved_lattice), E(evolved_lattice)
         elif energy:
             return E(evolved_lattice)
-        else:
+        elif mag:
             return M(evolved_lattice)
 
     out = np.array([metropolis() for step in range(nsteps)]).T

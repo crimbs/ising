@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def acf(M, nlags=10**3):
+def acf(M, nlags=10**5):
     """
     Autocorrelation for 1D array
     """
@@ -14,6 +14,9 @@ def acf(M, nlags=10**3):
 
 
 def tau_e(acf):
+    """
+    Returns exponential autocorrelation time tau_e
+    """
     exp_factor = 1 / np.exp(1)
     tau_e = len(np.extract(acf >= exp_factor, acf))
     return tau_e
