@@ -4,9 +4,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import ising
+import time
 
-M = ising.main(N=8, T=5, nsteps=10**3)[0]
+#----------hybrid--------------#
 
+
+def acf(M, nlags=40):
+    """
+    Autocorrelation for 1D array
+    """
+    Mdash = M - np.mean(M)
+    N = len(M)
+    d = N * np.ones(2 * N - 1)
+    acov = (np.correlate(Mdash, Mdash, 'full') / d)[N - 1:]
+    acf = acov[:nlags + 1] / acov[0]
+    return acf
+
+#---------- stats lib--------------#
 
 def acovf(x, unbiased=False):
     """
@@ -24,7 +38,7 @@ def acovf(x, unbiased=False):
     return acov
 
 
-def acf(x, nlags=40, unbiased=False):
+def acf0(x, nlags=40, unbiased=False):
     """
     Autocorrelation function for 1D
     """
@@ -37,37 +51,20 @@ def acf(x, nlags=40, unbiased=False):
     return acf
 
 
-isthis = acf(M, unbiased=True)
-
 #----------OLLIES VERSIOn________________#
 
 
-def ACF(x, max_lag):
-    '''
-    Returns autocovariance
-    '''
-    x = np.array(x)
-    N = len(x)
-    M_av = np.mean(x)
-    A0 = sum(((x - M_av)**2) / (N - 1))
+def ACF(M, nlags=41):
+    """
+    Returns correlation
+    """
+    M = np.array(M)
+    N = len(M)
+    M_av = np.mean(M)
+    Mdash = M - M_av
+    A0 = np.sum(((Mdash)**2) / (N - 1))
     out = [1]
-    for lag in range(1, max_lag):
-        out += [sum((x[lag:] - M_av) * (x[:(N - lag)] - M_av) /
+    for lag in range(1, nlags):
+        out += [sum((M[lag:] - M_av) * (M[:(N - lag)] - M_av) /
                     ((N - lag - 1) * A0))]
     return out
-
-
-# Plot variables
-max_lag = 40
-
-# ACF plot
-plt.figure()
-plt.bar(range(0, max_lag), ACF(M, max_lag))
-plt.xlabel('lag')
-plt.ylabel('ACF(cov)')
-
-
-plt.figure()
-plt.bar(range(len(isthis)), isthis)
-plt.xlabel('lag')
-plt.ylabel('ACF(cov)')
