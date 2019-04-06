@@ -14,22 +14,14 @@ def energy_required_to_flip(lattice, N, i, j):
     return dE
 
 
-def flip_spin(lattice, i, j):
-    '''
-    Flips the direction of the spin of an individual spin site (i, j)
-    '''
-    lattice[i][j] = -lattice[i][j]
-    return lattice[i][j]
-
-
-def M(lattice):
+def total_magnetisation(lattice):
     '''
     Returns total magnetisation of the system
     '''
     return np.sum(lattice)
 
 
-def E(lattice):
+def total_energy(lattice):
     '''
     Returns total energy of the system
     '''
@@ -40,67 +32,95 @@ def E(lattice):
     return np.sum(energy_array)
 
 
-def evolve(lat, T=1, n=1, everystep=False):
-    """
-    Evolve the lattice using metropolis algorithm
-    """
-    lattice = lat
-    N = len(lattice)
+def main(N=4, ntimesteps=10**4, ntemp=50):
 
-    if everystep:
-        for step in range(n):
-            i = np.random.randint(N, size=(2))
-            dE = energy_required_to_flip(lattice, N, *i)
-            if dE < 0 or np.exp(-dE / T) > np.random.rand():
-                flip_spin(lattice, *i)
-            return lattice
+    nburn = 1000
+    nsites = N**2
+    total_steps = ntimesteps * nsites
 
-    else:
-        for step in range(n):
-            i = np.random.randint(N, size=(2))
-            dE = energy_required_to_flip(lattice, N, *i)
-            if dE < 0 or np.exp(-dE / T) > np.random.rand():
-                flip_spin(lattice, *i)
-        return lattice
-
-
-def main(
-        N=4,
-        T=1,
-        nsteps=10**2,
-        mag=True,
-        energy=False,
-        burn=True,
-        nburn=10**4,
-        everystep=False):
-    """
-    Returns the two-dimensional array [Magnetisation,Energy]
-    """
-    temp = T
+    # Initialise arrays
+    T_arr = np.linspace(1, 5, num=ntemp)
+    M_arr = np.empty(ntemp)
+    E_arr = np.empty(ntemp)
+    X_arr = np.empty(ntemp)
+    C_arr = np.empty(ntemp)
+    U_arr = np.empty(ntemp)
 
     # Initialisation of lattice
     lattice = np.random.choice([1, -1], size=(N, N))
 
-    # Burn-in to reach equilibrium
-    if burn:
-        lattice = evolve(lat=lattice, T=temp, n=nburn, everystep=False)
+    temp_ind = 0     # temperature loop indexing integer
 
-    # Return various thermodynaimc quantities every step or every sweep
-    def metropolis():
-        if everystep:
-            evolved_lattice = evolve(lat=lattice, T=temp, n=1, everystep=True)
-            return M(evolved_lattice)
-        else:
-            evolved_lattice = evolve(
-                lat=lattice, T=temp, n=N**2, everystep=False)
+    # Temperature loop
+    for T in T_arr:
 
-        if mag and energy:
-            return M(evolved_lattice), E(evolved_lattice)
-        elif energy:
-            return E(evolved_lattice)
-        elif mag:
-            return M(evolved_lattice)
+        # Burn-in to reach equilibrium
+        random_site = np.random.randint(N, size=(nburn, 2))
+        for step in range(nburn):
+            i, j = random_site[step][0], random_site[step][1]
+            dE = energy_required_to_flip(lattice, N, i, j)
+            if dE < 0 or np.exp(-dE / T) >= np.random.rand():
+                lattice[i][j] = -lattice[i][j]
 
-    out = np.array([metropolis() for step in range(nsteps)]).T
+        # Define thermodynamic observables
+        m = total_magnetisation(lattice)    # magnetisation counter
+        e = total_energy(lattice)           # energy counter
+        M = 0
+        Msq = 0
+        Mq = 0
+        E = 0
+        Esq = 0
+
+        random_site = np.random.randint(N, size=(total_steps, 2))
+        tstep_ind = 0  # timestep loop indexing integer
+
+        # Main loop
+        for timestep in range(ntimesteps):
+
+            # Do a lattice sweep
+            for site in range(nsites):
+                i, j = random_site[tstep_ind][0], random_site[tstep_ind][1]
+                dE = energy_required_to_flip(lattice, N, i, j)
+                if dE < 0 or np.exp(-dE / T) >= np.random.rand():
+                    lattice[i][j] = -lattice[i][j]
+                    m += 2 * lattice[i][j]
+                    e += 2 * dE
+                # End of lattice sweep loop
+
+            # Update thermodynamic observables
+            M += m
+            Msq += m**2
+            Mq += m**4
+            E += e / 2
+            Esq += (e / 2)**2
+
+            tstep_ind += 1
+            # End of time step loop
+
+        # Update averages
+        M_av = M / total_steps
+        Msq_av = Msq / total_steps
+        Mq_av = Mq / total_steps
+        E_av = E / total_steps
+        Esq_av = Esq / total_steps
+
+        # Place obseravables into arrays
+        M_arr[temp_ind] = M_av
+        E_arr[temp_ind] = E_av
+        X_arr[temp_ind] = (Msq_av - ((M_av**2) * nsites)) / (T)
+        C_arr[temp_ind] = (Esq_av - ((E_av**2) * nsites)) / (T**2)
+        U_arr[temp_ind] = 1 - (Mq_av / (3 * Msq_av))
+
+        temp_ind += 1
+        # end of temperature loop
+
+    # create one master array to be returned
+    out = np.vstack((T_arr, M_arr, E_arr, X_arr, C_arr, U_arr)).T
+
+    f = np.savetxt('data', out, header='T, M, E, X, C, U')
 
     return out
+
+
+if __name__ == "__main__":
+    main()

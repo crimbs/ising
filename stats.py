@@ -1,4 +1,5 @@
 import numpy as np
+import ising
 
 
 def acf(M, nlags=10**5):

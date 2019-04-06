@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import ising
 import stats
 
-M = ising.main(N=8, T=5, nsteps=10**3, mag=True, everystep=True)
-y = stats.acf(M, nlags=100)[0::2]
+M = ising.main(N=8, T=5, nsteps=10**3, mag=True, everystep=False)
+y = stats.acf(M, nlags=10)
 
 # ACF plot
 plt.figure()
