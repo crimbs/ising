@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-def energy_required_to_flip(lattice, N, i, j):
+def energy_required_to_flip(lattice, N, i, j, dE):
     '''
     Energy required to flip the spin of an individual spin site (i, j)
     '''
@@ -9,7 +9,6 @@ def energy_required_to_flip(lattice, N, i, j):
                                        + lattice[((i + 1) % N)][j]
                                        + lattice[i][((j - 1) % N)]
                                        + lattice[i][((j + 1) % N)])
-    return dE
 
 
 def total_magnetisation(lattice):
@@ -30,11 +29,12 @@ def total_energy(lattice):
     return np.sum(energy_array)
 
 
-def main(N=6, ntimesteps=10**5, Tmin=1, Tmax=5, ntemp=50):
+def main(N=8, ntimesteps=10**5, Tmin=1, Tmax=5, ntemp=50):
     
     nsites = N**2
     total_steps = ntimesteps * nsites
-    nburn = int(9*np.exp(0.7*N))
+    nburn = int(9*np.exp(0.8*N))
+    dE = 0
 
     # Initialise arrays
     T_arr = np.linspace(Tmin, Tmax, num=ntemp)
@@ -58,7 +58,7 @@ def main(N=6, ntimesteps=10**5, Tmin=1, Tmax=5, ntemp=50):
         random_site = np.random.randint(N, size=(nburn, 2))
         for step in range(nburn):
             i, j = random_site[step][0], random_site[step][1]
-            dE = energy_required_to_flip(lattice, N, i, j)
+            energy_required_to_flip(lattice, N, i, j, dE)
             if dE < 0 or np.exp(-dE / T) >= np.random.rand():
                 lattice[i][j] = -lattice[i][j]
 
@@ -81,7 +81,7 @@ def main(N=6, ntimesteps=10**5, Tmin=1, Tmax=5, ntemp=50):
             # Do a lattice sweep
             for site in range(nsites):
                 i, j = random_site[tstep_ind][0], random_site[tstep_ind][1]
-                dE = energy_required_to_flip(lattice, N, i, j)
+                energy_required_to_flip(lattice, N, i, j, dE)
                 if dE < 0 or np.exp(-dE / T) >= np.random.rand():
                     lattice[i][j] = -lattice[i][j]
                     m += 2 * lattice[i][j]

@@ -40,17 +40,18 @@ def E(lattice):
     return np.sum(energy_array)
 
 
-def evolve(lattice, T=1, n=1, everystep=False):
+def evolve(lat, T=1, n=1, everystep=False):
     """
     Evolve the lattice using metropolis algorithm
     """
+    lattice = lat
     N = len(lattice)
 
     if everystep:
         for step in range(n):
             i = np.random.randint(N, size=(2))
             dE = energy_required_to_flip(lattice, N, *i)
-            if dE < 0 or np.exp(-dE / T) >= np.random.rand():
+            if dE < 0 or np.exp(-dE / T) > np.random.rand():
                 flip_spin(lattice, *i)
             return lattice
 
@@ -58,7 +59,7 @@ def evolve(lattice, T=1, n=1, everystep=False):
         for step in range(n):
             i = np.random.randint(N, size=(2))
             dE = energy_required_to_flip(lattice, N, *i)
-            if dE < 0 or np.exp(-dE / T) >= np.random.rand():
+            if dE < 0 or np.exp(-dE / T) > np.random.rand():
                 flip_spin(lattice, *i)
         return lattice
 
@@ -67,11 +68,10 @@ def main(
         N=4,
         T=1,
         nsteps=10**2,
-        mag=False,
+        mag=True,
         energy=False,
-        lattice=False,
         burn=True,
-        nburn=1000,
+        nburn=10**3,
         everystep=False):
     """
     Returns the two-dimensional array [Magnetisation,Energy]
@@ -79,18 +79,20 @@ def main(
     temp = T
 
     # Initialisation of lattice
-    lat = np.random.choice([1, -1], size=(N, N))
+    lattice = np.random.choice([1, -1], size=(N, N))
 
     # Burn-in to reach equilibrium
     if burn:
-        lattice = evolve(lattice=lat, T=temp, n=nburn*(N**2), everystep=False)
+        lattice = evolve(lat=lattice, T=temp, n=nburn*(N**2), everystep=False)
 
     # Return various thermodynaimc quantities every step or every sweep
     def metropolis():
         if everystep:
-            evolved_lattice = evolve(lattice=lat, T=temp, n=1, everystep=True)
+            evolved_lattice = evolve(lat=lattice, T=temp, n=1, everystep=True)
+            return M(evolved_lattice)
         else:
-            evolved_lattice = evolve(lattice=lat, T=temp, n=N**2)
+            evolved_lattice = evolve(
+                lat=lattice, T=temp, n=N**2, everystep=False)
 
         if mag and energy:
             return M(evolved_lattice), E(evolved_lattice)
@@ -98,11 +100,7 @@ def main(
             return E(evolved_lattice)
         elif mag:
             return M(evolved_lattice)
-        elif lattice:
-            return evolved_lattice
-        
+
     out = np.array([metropolis() for step in range(nsteps)]).T
 
     return out
-
-

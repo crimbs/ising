@@ -15,7 +15,7 @@ def main(T=5, N=4):
 
 
 T_c = 2 / np.log(1 + np.sqrt(2))
-T_array = np.linspace(0.5, 5)
+T_array = np.linspace(0.5, 5, num=5)
 N_array = np.array([2, 4, 8, 16])
 
 C = np.array([np.array([main(T=t, N=n) for t in T_array]) for n in N_array])
