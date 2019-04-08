@@ -35,20 +35,33 @@ Tc4 = estimate_Tc(N4)
 Tc2 = estimate_Tc(N2)
 ydata = np.array([Tc2, Tc4, Tc6, Tc8, Tc10, Tc12])
 
+# Main plot
 popt, pcov = optimize.curve_fit(line, xdata, ydata)
-
-plt.figure()
-plt.plot(xdata, ydata, 'o', label='C')
 plt.errorbar(xdata, ydata, yerr=0.08)
-plt.plot(
-    np.linspace(
-        0, 1), line(
-            np.linspace(
-                0, 1), *popt), 'b--', label='fit: a=%5.3f, $T_c$=%5.3f' %
-    tuple(popt))
-plt.plot(0, T_c, 'ro', label='Onsager')
-plt.xlabel('$N^{1/\nu}$')
+plt.plot(np.linspace(0, 1), line(np.linspace(0, 1), *popt), 'b--', 
+                             label='fit: a=%5.3f, $T_c$=%5.3f' %tuple(popt))
+
+# Maximum slope
+popt, pcov = optimize.curve_fit(line, np.array([xdata[0], xdata[5]]), 
+                                    np.array([ydata[0]+0.08, ydata[5]-0.08]))
+plt.plot(xdata[0], ydata[0]+0.08, 'go')
+plt.plot(xdata[5], ydata[5]-0.08, 'go')
+plt.plot(np.linspace(0, 1), line(np.linspace(0, 1), *popt), 'g--', 
+                             label='fit: a=%5.3f, $T_c$=%5.3f' %tuple(popt))
+
+# Minimum slope
+popt, pcov = optimize.curve_fit(line, np.array([xdata[0], xdata[5]]), 
+                                    np.array([ydata[0]-0.08, ydata[5]+0.08]))
+plt.plot(xdata[0], ydata[0]-0.08, 'ro')
+plt.plot(xdata[5], ydata[5]+0.08, 'ro')
+plt.plot(np.linspace(0, 1), line(np.linspace(0, 1), *popt), 'r--', 
+                             label='fit: a=%5.3f, $T_c$=%5.3f' %tuple(popt))
+
+
+plt.xlabel('$N^{1/v}$')
 plt.ylabel('$T_{c}(N)$')
 plt.ylim(2, 3)
 plt.legend()
 tikz_save('filename.tex')
+
+(0.772 - 0.389) / 2

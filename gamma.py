@@ -38,8 +38,9 @@ popt, pcov = optimize.curve_fit(line, xdata, ydata)
 
 gamma = nu * popt[0]
 
+
 plt.figure()
-plt.plot(xdata, ydata, 'o', label='data')
+plt.errorbar(xdata, ydata, yerr=0.5, label='data')
 #plt.errorbar(xdata, ydata, yerr=0.08)
 plt.plot(
     np.linspace(
@@ -51,6 +52,5 @@ plt.xlabel('$Ln(L)$')
 plt.ylabel(r'$\ln(\chi_{max})$')
 plt.xlim(0, 3)
 plt.legend()
-
 
 tikz_save('gam.tex')
