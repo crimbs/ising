@@ -1,15 +1,14 @@
 import numpy as np
 import time
 
-
 def energy_required_to_flip(lattice, N, i, j):
     '''
     Energy required to flip the spin of an individual spin site (i, j)
     '''
     dE = 2 * lattice[i][j] * (lattice[((i - 1) % N)][j]
-                              + lattice[((i + 1) % N)][j]
-                              + lattice[i][((j - 1) % N)]
-                              + lattice[i][((j + 1) % N)])
+                                       + lattice[((i + 1) % N)][j]
+                                       + lattice[i][((j - 1) % N)]
+                                       + lattice[i][((j + 1) % N)])
     return dE
 
 
@@ -31,11 +30,11 @@ def total_energy(lattice):
     return np.sum(energy_array)
 
 
-def main(N=4, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=1):
-
+def main(N=16, ntimesteps=10**5, Tmin=1, Tmax=5, ntemp=50):
+    
     nsites = N**2
     total_steps = ntimesteps * nsites
-    nburn = 1000
+    nburn = int(10*np.exp(0.7*N))
 
     # Initialise arrays
     T_arr = np.linspace(Tmin, Tmax, num=ntemp)
@@ -56,8 +55,8 @@ def main(N=4, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=1):
     for T in T_arr:
 
         # Burn-in to reach equilibrium
-        random_site = np.random.randint(N, size=(nburn*nsites, 2))
-        for step in range(nburn*nsites):
+        random_site = np.random.randint(N, size=(nburn, 2))
+        for step in range(nburn):
             i, j = random_site[step][0], random_site[step][1]
             dE = energy_required_to_flip(lattice, N, i, j)
             if dE < 0 or np.exp(-dE / T) >= np.random.rand():
@@ -116,23 +115,16 @@ def main(N=4, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=1):
         U_arr[temp_ind] = 1 - (Mq_av / (3 * Msq_av))
         Mabs_arr[temp_ind] = Mabs_av
         Xabs_arr[temp_ind] = (Msq_av - ((Mabs_av**2) * nsites)) / (T)
-
+        
         temp_ind += 1
         # end of temperature loop
 
     # create one master array to be returned
-    out = np.vstack(
-        (T_arr,
-         M_arr,
-         E_arr,
-         X_arr,
-         C_arr,
-         U_arr,
-         Mabs_arr,
-         Xabs_arr)).T
+    out = np.vstack((T_arr, M_arr, E_arr, X_arr, C_arr, U_arr, Mabs_arr, Xabs_arr)).T
 
-    np.savetxt('data', out, header='T, M, E, X, C, U, Mabs, Xabs_arr')
+    f = np.savetxt('data', out, header='T, M, E, X, C, U, Mabs, Xabs_arr')
 
+    return out
 
 start = time.time()
 
