@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 
 def energy_required_to_flip(lattice, N, i, j, H):
     '''
@@ -34,7 +34,7 @@ def total_energy(lattice, H):
     return np.sum(energy_array)
 
 
-def main(N=4, T=5, ntimesteps=10**2, nHsteps=50, Hmax=2):
+def main(N=4, T=2, ntimesteps=10**4, nHsteps=50, Hmax=2):
 
     nsites = N**2
     total_steps = ntimesteps * nsites
@@ -126,7 +126,17 @@ def main(N=4, T=5, ntimesteps=10**2, nHsteps=50, Hmax=2):
             
         H_ind_down += 1
         # end of H-field loop
-
+    
+    
     out = np.vstack((H_arr_up, M_arr_up, M_arr_down)).T
     
+    np.savetxt('T%0.0f' % T, out, header='H, M up, M down')
+    
     return out
+
+start = time.time()
+
+if __name__ == "__main__":
+    main()
+print(time.time() - start)
+

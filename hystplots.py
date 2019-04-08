@@ -1,23 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import hysteresis
-from scipy import signal
 
+H = np.linspace(-2, 2, num=50)
 
-data = hysteresis.main(N=4, T=t, ntimesteps=10**3, nHsteps=50, Hmax=2).T
+T1 = np.loadtxt('T1').T
+T2 = np.loadtxt('T2').T
+T3 = np.loadtxt('T3').T
 
-H = data[0]
-up = data[1]
-down = np.flip(data[2])
-
-plt.plot(H, up)
-plt.plot(H, down)
-    
+plt.plot(H, T1[1])
+plt.plot(H, np.flip(T1[2]))
+plt.plot(H, T2[1])
+plt.plot(H, np.flip(T2[2]))
+plt.plot(H, T3[1])
+plt.plot(H, np.flip(T3[2]))
 plt.xlabel('$H$')
 plt.ylabel('$M$')
 
-from scipy import signal
 
-
-#from matplotlib2tikz import save as tikz_save
-#tikz_save('filename.tex')
+from matplotlib2tikz import save as tikz_save
+tikz_save('hyst.tex')

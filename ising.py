@@ -91,7 +91,7 @@ def main(N=4, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=1):
 
             # Update thermodynamic observables
             M += m
-            Mabs += np.abs(m)
+            Mabs += abs(m)
             Msq += m**2
             Mq += m**4
             E += e / 2
@@ -131,7 +131,7 @@ def main(N=4, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=1):
          Mabs_arr,
          Xabs_arr)).T
 
-    np.savetxt('data', out, header='T, M, E, X, C, U, Mabs, Xabs_arr')
+    np.savetxt('N%0.0f' % N, out, header='T, M, E, X, C, U, Mabs, Xabs_arr')
 
 
 start = time.time()
