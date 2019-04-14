@@ -1,4 +1,3 @@
-from matplotlib2tikz import save as tikz_save
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as optimize
@@ -25,12 +24,12 @@ N4 = np.loadtxt('N4+').T
 N_arr = np.array([4, 6, 10, 12])
 xdata = np.log(N_arr)
 
-Xmax12 = N12[7][np.argmax(N12[7])]
-Xmax10 = N10[7][np.argmax(N10[7])]
-#Xmax8 = N8[7][np.argmax(N8[7])]
-Xmax6 = N6[7][np.argmax(N6[7])]
-Xmax4 = N4[7][np.argmax(N4[7])]
-#Xmax2 = N2[7][np.argmax(N2[7])]
+Xmax12 = N12[7].max()
+Xmax10 = N10[7].max()
+#Xmax8 = N8[7].max()
+Xmax6 = N6[7].max()
+Xmax4 = N4[7].max()
+#Xmax2 = N2[7].max()
 Xmax_arr = np.array([Xmax4, Xmax6, Xmax10, Xmax12])
 ydata = np.log(Xmax_arr)
 
@@ -38,19 +37,12 @@ popt, pcov = optimize.curve_fit(line, xdata, ydata)
 
 gamma = nu * popt[0]
 
-
 plt.figure()
 plt.errorbar(xdata, ydata, yerr=0.5, label='data')
 #plt.errorbar(xdata, ydata, yerr=0.08)
-plt.plot(
-    np.linspace(
-        0, 3), line(
-            np.linspace(
-                0, 3), *popt), 'b--', label='fit: gamma=%5.3f' %
-    gamma)
+plt.plot(np.linspace(0, 3), line(np.linspace(0, 3), *popt), 'b--', 
+                                         label='fit: gamma=%5.3f' % gamma)
 plt.xlabel('$Ln(L)$')
 plt.ylabel(r'$\ln(\chi_{max})$')
 plt.xlim(0, 3)
 plt.legend()
-
-tikz_save('gam.tex')

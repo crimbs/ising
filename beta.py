@@ -1,7 +1,6 @@
 from matplotlib2tikz import save as tikz_save
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import signal
 import scipy.optimize as optimize
 
 

@@ -24,12 +24,12 @@ N4 = np.loadtxt('N4+').T
 N_arr = np.array([4, 6, 8, 10, 12])
 xdata = np.log(N_arr)
 
-Xmax12 = N12[4][np.argmax(N12[4])]
-Xmax10 = N10[4][np.argmax(N10[4])]
-Xmax8 = N8[4][np.argmax(N8[4])]
-Xmax6 = N6[4][np.argmax(N6[4])]
-Xmax4 = N4[4][np.argmax(N4[4])]
-#Xmax2 = N2[4][np.argmax(N2[4])]
+Xmax12 = N12[4].max()
+Xmax10 = N10[4].max()
+Xmax8 = N8[4].max()
+Xmax6 = N6[4].max()
+Xmax4 = N4[4].max()
+#Xmax2 = N2[4].max()
 Xmax_arr = np.array([Xmax4, Xmax6, Xmax8, Xmax10, Xmax12])
 ydata = Xmax_arr
 
@@ -40,10 +40,7 @@ alpha = nu * popt[0]
 plt.figure()
 plt.plot(xdata, ydata, 'o', label='data')
 #plt.errorbar(xdata, ydata, yerr=0.08)
-plt.plot(
-    np.linspace(
-        0, 3), line(
-            np.linspace(
+plt.plot(np.linspace(0, 3), line(np.linspace(
                 0, 3), *popt), 'b--', label='fit: alpha=%5.3f' % alpha)
 plt.xlabel('$Ln(L)$')
 plt.ylabel('$C_{max}$')

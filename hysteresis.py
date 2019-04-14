@@ -34,7 +34,7 @@ def total_energy(lattice, H):
     return np.sum(energy_array)
 
 
-def main(N=4, T=2, ntimesteps=10**4, nHsteps=50, Hmax=2):
+def main(N=4, T=1, ntimesteps=10**3, nHsteps=50, Hmax=2):
 
     nsites = N**2
     total_steps = ntimesteps * nsites
@@ -70,13 +70,11 @@ def main(N=4, T=2, ntimesteps=10**4, nHsteps=50, Hmax=2):
                 if dE < 0 or np.exp(-dE / T) >= np.random.rand():
                     lattice[i][j] = -lattice[i][j]
                     m += 2 * lattice[i][j]
+                tstep_ind += 1
                 # End of lattice sweep loop
 
             # Update thermodynamic observables
             M += m
-
-            tstep_ind += 1
-            # End of time step loop
 
         # Update averages
         M_av = M / total_steps
@@ -109,25 +107,21 @@ def main(N=4, T=2, ntimesteps=10**4, nHsteps=50, Hmax=2):
                 if dE < 0 or np.exp(-dE / T) >= np.random.rand():
                     lattice[i][j] = -lattice[i][j]
                     m += 2 * lattice[i][j]
+                tstep_ind += 1
                 # End of lattice sweep loop
 
             # Update thermodynamic observables
             M += m
-
-            tstep_ind += 1
-            # End of time step loop
 
         # Update averages
         M_av = M / total_steps
 
         # Place obseravables into arrays
         M_arr_down[H_ind_down] = M_av
-            
-            
+                     
         H_ind_down += 1
         # end of H-field loop
-    
-    
+      
     out = np.vstack((H_arr_up, M_arr_up, M_arr_down)).T
     
     np.savetxt('T%0.0f' % T, out, header='H, M up, M down')
