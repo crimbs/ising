@@ -46,7 +46,7 @@ def CClabel(lattice):
 
 def domain_size(lattice, plot=False):
     """
-    Returns the tuple: (Average Cluster Size, Largest Cluster Size)
+    Returns the Largest Cluster Size
     """
     N = len(lattice)
     labels = CClabel(lattice)
@@ -59,7 +59,7 @@ def domain_size(lattice, plot=False):
         plt.imshow(out, cmap='gray')
         plt.colorbar()
         plt.axis('off')
-        plt.title('Lattice Grouped By Domain Size (N=%0.0f)' % N)
+        plt.title('Lattice Grouped By Domain Size (N=%i)' % N)
 
     largest_cluster = out.max()
 

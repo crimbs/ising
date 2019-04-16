@@ -52,7 +52,7 @@ def burn(N, nsites, lattice, T, nburn):
             lattice[i][j] = -lattice[i][j]
 
 
-def main(N=16, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=50):
+def main(N=32, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
     """
     Implements the metropolis algorithm and saves data to file
     """
@@ -137,6 +137,7 @@ def main(N=16, ntimesteps=10**3, Tmin=1, Tmax=5, ntemp=50):
     # Create master array and save to file
     out = np.vstack((T_arr, Mabs_arr, E_arr, X_arr, C_arr, DS_arr)).T
     np.savetxt("N%i" % N, out, header="T, |M|, E, X, C, Domain Size")
+
 
 
 start = time.time()

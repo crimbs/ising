@@ -58,8 +58,6 @@ N_arr = np.array([4, 8])
 
 #np.savetxt("wolff", wolff, header="N, tau_e")
 
-
-
 wol = np.loadtxt('wolff').T
 
 xdata = np.log(wol[0])
