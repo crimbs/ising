@@ -41,7 +41,7 @@ def total_energy(lattice):
 def burn(N, nsites, lattice, T, nburn):
     """
     """
-    # Generate random coordinates/test values for burn-in
+    # Generate random coordinates/test values
     random_site = np.random.randint(N, size=(nburn*nsites, 2))
     boltzmann_picker = np.random.rand(nburn*nsites)
     
@@ -52,7 +52,7 @@ def burn(N, nsites, lattice, T, nburn):
             lattice[i][j] = -lattice[i][j]
 
 
-def main(N=32, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
+def main(N=64, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
     """
     Implements the metropolis algorithm and saves data to file
     """
@@ -71,6 +71,8 @@ def main(N=32, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
 
     # Initialisation of lattice
     lattice = np.random.choice([+1, -1], size=(N, N))
+    
+    burn(N, nsites, lattice, T=Tmin, nburn=1000)
     
     temp_ind = 0        # temperature loop array indexing integer
     
