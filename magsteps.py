@@ -124,7 +124,7 @@ def main(N=8, ntimesteps=10**1, T=2.5, metropolis=True, wolff=False):
         
     # Create master array and save to file
     out = np.vstack((nsteps, Mabs_arr)).T
-    np.savetxt("acf_N%0.0f" % N, out, header="Steps, |M|")
+    np.savetxt("acf_N%i" % N, out, header="Steps, |M|")
     
     return out
 

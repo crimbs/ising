@@ -34,7 +34,7 @@ def total_energy(lattice, H):
     return np.sum(energy_array)
 
 
-def main(N=4, T=1, ntimesteps=10**3, nHsteps=50, Hmax=2):
+def main(N=8, T=2.5, ntimesteps=10**3, nHsteps=7, Hmax=1):
 
     nsites = N**2
     total_steps = ntimesteps * nsites
@@ -124,7 +124,7 @@ def main(N=4, T=1, ntimesteps=10**3, nHsteps=50, Hmax=2):
       
     out = np.vstack((H_arr_up, M_arr_up, M_arr_down)).T
     
-    np.savetxt('T%0.0f' % T, out, header='H, M up, M down')
+    np.savetxt('N8T%0.1f' % T, out, header='H, M up, M down')
     
     return out
 
