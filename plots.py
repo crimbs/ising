@@ -7,10 +7,10 @@ N32 = np.loadtxt('data/N32').T
 N16 = np.loadtxt('data/N16').T
 N8 = np.loadtxt('data/N8').T
 # Hysteresis data:
-T1point5 = np.loadtxt('data/N8T1.5').T
-T2 = np.loadtxt('data/N8T2').T
+T1 = np.loadtxt('data/T1').T
+T2 = np.loadtxt('data/T2').T
 
-# X-axis for plots
+# Horizontal temperature axis for plots
 T_c = 2 / np.log(1 + np.sqrt(2))
 T = np.linspace(1, 5, num=50)
 t = T / T_c
@@ -72,8 +72,8 @@ plt.legend()
 
 # Hysteresis Plot
 plt.figure()
-plt.plot(T1point5[0], T1point5[1])
-plt.plot(T1point5[0], np.flip(T1point5[2]))
+plt.plot(T1[0], T1[1])
+plt.plot(T1[0], np.flip(T1[2]))
 plt.plot(T2[0], T2[1])
 plt.plot(T2[0], np.flip(T2[2]))
 plt.xlabel('$H$')

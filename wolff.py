@@ -2,12 +2,17 @@ import numpy as np
 import time
 import math
 import domainsize
-import matplotlib.pyplot as plt
 
+__all__ = ['energy_required_to_flip', 
+           'total_magnetisation', 
+           'burn',
+           'main']
 
 def energy_required_to_flip(lattice, N, i, j):
     """
-    Energy required to flip the spin of an individual spin site (i, j)
+    Returns energy required to flip the spin of an 
+    individual spin site (i, j). Toroidal periodic
+    boundary conditions are imposed.
     """
     dE = 2. * lattice[i][j] * (lattice[((i - 1) % N)][j]
                               + lattice[((i + 1) % N)][j]
@@ -18,26 +23,26 @@ def energy_required_to_flip(lattice, N, i, j):
 
 def total_magnetisation(lattice):
     """
-    Returns total magnetisation of the system
+    Returns total magnetisation of a given lattice
     """
     return np.sum(lattice)
 
 
-def total_energy(lattice):
-    """
-    Returns total energy of the system
-    """
-    energy_array = -1. * lattice * (np.roll(lattice, -1, 0)
-                                   + np.roll(lattice, +1, 0)
-                                   + np.roll(lattice, -1, 1)
-                                   + np.roll(lattice, +1, 1))
-    return np.sum(energy_array)
-
 
 def burn(N, nsites, lattice, T, nburn):
     """
+    Function which iterates the Metropolis algorithm
+    to `burn-in' the lattice to reach equilibrium.
+    -----------------------------
+    Parameters
+    -----------------------------
+    N :         Lattice size (i.e. N x N lattice)
+    nsites :    Number of sites on the lattice (i.e. N^2)
+    lattice :   N x N numpy array of +1 or -1 values
+    T :         Temperature
+    nburn :     Number of iterations to reach equilibrium
     """
-    # Generate random coordinates/test values for burn-in
+    # Generate random coordinates/test values
     random_site = np.random.randint(N, size=(nburn*nsites, 2))
     boltzmann_picker = np.random.rand(nburn*nsites)
     
@@ -48,103 +53,109 @@ def burn(N, nsites, lattice, T, nburn):
             lattice[i][j] = -lattice[i][j]
 
 
+def main(N=4, ntimesteps=500, T=2.5, metropolis=False, wolff=True):
+    """
+    Function which implements either the Metropolis algorithm or 
+    the Wolff Algorithm and saves the Absolute Magnetisation per spin
+    into a .txt file under the name 'mag_N<lattice size>.txt' 
+    (e.g. mag_N8.txt for an 8 x 8 lattice). This can then be
+    loaded using numpy.loadtxt into other scripts as a numpy array 
+    (and subsequently indexed for the relevant observables).
+    -----------------------------
+    Parameters
+    -----------------------------
+    N :             Lattice size (i.e. N x N lattice)
+    ntimesteps :    Number of time steps (i.e. sweeps of the lattice)
+    T :             Temperature
+    metropolis :    Boolean (default False) Use Metropolis algorithm
+    wolff :         Boolean (default True) Use Wolff algorithm
+    """
+    nsites = N**2
+    total_steps = ntimesteps * nsites
 
-N=4
-ntimesteps=10**2
-Tmin=1 
-Tmax=5 
-ntemp=5
-"""
-Implements the metropolis algorithm and saves data to file
-"""
-nsites = N * N
-total_steps = ntimesteps * nsites
-
-# Temperature array to be used in loop
-T_arr = np.linspace(Tmin, Tmax, num=ntemp)
-
-# Initialise arrays
-Mabs_arr = np.empty(ntemp)  # Absolute magnetisation per spin
-E_arr = np.empty(ntemp)     # Energy per spin
-X_arr = np.empty(ntemp)     # Susceptibility per spin
-C_arr = np.empty(ntemp)     # Heat capcity per spin
-
-# Initialisation of lattice
-lattice = np.random.choice([+1, -1], size=(N, N))
-
-temp_ind = 0        # temperature loop array indexing integer
-
-# Temperature loop
-for T in T_arr:
+    # steps array to be used in loop
+    nsteps = np.arange(total_steps, dtype=float)
     
+    # Initialise arrays
+    Mabs_arr = np.empty(total_steps)  # Absolute magnetisation per spin
+
+    # Initialisation of lattice
+    lattice = np.random.choice([+1, -1], size=(N, N))
+        
     # Burn in to reach equilibrium
     burn(N, nsites, lattice, T, nburn=1000)
-
-    # Define thermodynamic observables
-    Mabs = 0
-    Msq = 0
-    E = 0
-    Esq = 0
     
+    # Update random coordinates/test values for main loop
+    random_site = np.random.randint(N, size=(total_steps, 2))
+    boltzmann_picker = np.random.rand(total_steps)
+    
+    m = total_magnetisation(lattice)
+
     tstep_ind = 0  # timestep loop array indexing integer
-
-    # Wolff Algorithm variables
-    p = 1 - math.exp(-2/T)
-    todolist = []
-    label = 1
     
-    for timestep in range(ntimesteps):
-        labelled = np.zeros_like(lattice)
-        i, j = np.random.randint(N), np.random.randint(N)
-        if labelled[i][j] == 0:
-            labelled[i][j] = label
-            todolist.append((i, j))
+    if metropolis:
+        # Main timestep loop
+        for timestep in nsteps:
             
-            while todolist:
-                site = todolist.pop(0)
-                neighbours = domainsize.getNeighbours(N, *site)
+            i, j = random_site[tstep_ind][0], random_site[tstep_ind][1]
+            dE = energy_required_to_flip(lattice, N, i, j)
+            if dE < 0 or math.exp(-dE / T) >= boltzmann_picker[tstep_ind]:
+                lattice[i][j] = -lattice[i][j]
+                m += 2 * lattice[i][j]
+        
+            # Place obseravables into arrays
+            Mabs_arr[tstep_ind] = abs(m) / nsites
+            
+            tstep_ind += 1
+    
+    elif wolff:
+        # Wolff Algorithm variables
+        cluster_size = 0
+        p = 1 - math.exp(-2/T)
+        todolist = []
+        label = 1
+        ind = 0
+        for timestep in nsteps:
+            labelled = np.zeros_like(lattice)
+            i, j = np.random.randint(N), np.random.randint(N)
+            if labelled[i][j] == 0:
+                labelled[i][j] = label
+                todolist.append((i, j))
                 
-                for k in [0, 1, 2, 3]:
-                    if  lattice[neighbours[k]] == lattice[i][j] and \
-                        labelled[neighbours[k]] == 0 and \
-                        p >= np.random.rand():   
-                        labelled[neighbours[k]] = label
-                        todolist.append(neighbours[k])
-                    tstep_ind += 1
-        
-        # Flip cluster
-        lattice = np.where(labelled, -lattice, lattice)
-        
-        # Update thermodynamic observables
-        Mabs += np.abs(total_magnetisation(lattice))
-        Msq += np.abs(total_magnetisation(lattice))**2
-        E += total_energy(lattice) / 2
-        Esq += (total_energy(lattice) / 2)**2
+                while todolist:
+                    site = todolist.pop(0)
+                    neighbours = domainsize.getNeighbours(N, *site)
+                    
+                    for k in [0, 1, 2, 3]:
+                        if  lattice[neighbours[k]] == lattice[i][j] and \
+                            labelled[neighbours[k]] == 0 and \
+                            p >= np.random.rand():   
+                            labelled[neighbours[k]] = label
+                            todolist.append(neighbours[k])
+                        tstep_ind += 1
             
-    # Update averages
-    Mabs_av = Mabs / total_steps
-    Msq_av = Msq / total_steps
-    E_av = E / total_steps
-    Esq_av = Esq / total_steps
+            # Flip cluster
+            lattice = np.where(labelled, -lattice, lattice)
+            
+            cluster_size += np.sum(labelled)
+            
+            # Place obseravables into arrays
+            Mabs_arr[ind] = np.abs(total_magnetisation(lattice)) / nsites
+            ind += 1
         
-    # Place averages into arrays
-    Mabs_arr[temp_ind] = Mabs_av
-    E_arr[temp_ind] = E_av
-    X_arr[temp_ind] = (Msq_av - ((Mabs_av**2) * nsites)) / (T)
-    C_arr[temp_ind] = (Esq_av - ((E_av**2) * nsites)) / (T**2)
+        timestep_sf = (total_steps * nsites) / cluster_size
+        
+        nsteps *= timestep_sf
+        
+    # Create master array and save to file
+    out = np.vstack((nsteps, Mabs_arr)).T
+    np.savetxt("mag_N%i" % N, out, header="Steps, |M|")
     
-    temp_ind += 1
-    # end of temperature loop
+    return out
 
-# Create master array and save to file
-out = np.vstack((T_arr, Mabs_arr, E_arr, X_arr, C_arr)).T
-np.savetxt("N%0.0f" % N, out, header="T, |M|, E, X, C")
+start = time.time()
 
-plt.figure()
-plt.plot(out.T[0], out.T[1])
-plt.figure()
-plt.plot(out.T[0], out.T[2])
-plt.figure()
-plt.plot(out.T[0], out.T[3])
-plt.figure()
-plt.plot(out.T[0], out.T[4])
+if __name__ == "__main__":
+    main()
+    
+print(time.time() - start)

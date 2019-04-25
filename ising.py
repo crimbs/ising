@@ -17,7 +17,9 @@ __all__ = ['energy_required_to_flip',
 
 def energy_required_to_flip(lattice, N, i, j):
     """
-    Energy required to flip the spin of an individual spin site (i, j)
+    Returns energy required to flip the spin of an 
+    individual spin site (i, j). Toroidal periodic
+    boundary conditions are imposed.
     """
     dE = 2. * lattice[i][j] * (lattice[((i - 1) % N)][j]
                               + lattice[((i + 1) % N)][j]
@@ -28,14 +30,15 @@ def energy_required_to_flip(lattice, N, i, j):
 
 def total_magnetisation(lattice):
     """
-    Returns total magnetisation of the system
+    Returns total magnetisation of a given lattice
     """
     return np.sum(lattice)
 
 
 def total_energy(lattice):
     """
-    Returns total energy of the system
+    Returns total energy of a given lattice. 
+    Toroidal periodic boundary conditions are imposed.
     """
     energy_array = -1. * lattice * (np.roll(lattice, -1, 0)
                                    + np.roll(lattice, +1, 0)
@@ -46,7 +49,9 @@ def total_energy(lattice):
 
 def getNeighbours(N, i, j):
     """
-    Returns a list of neighbour coordinates for the site (i, j)
+    Returns a list of neighbour coordinates tuples 
+    for the site (i, j). Toroidal periodic boundary 
+    conditions are imposed.
     """
     neighbours = []
     neighbours.append(tuple([(i + 1) % N, j]))
@@ -58,7 +63,8 @@ def getNeighbours(N, i, j):
 
 def CClabel(lattice):
     """
-    Connected-component labeling function with periodic boundary conditions
+    Connected-component labeling function for a given lattice
+    Toroidal periodic boundary conditions are imposed.
     """
     N = len(lattice)
     labelled = np.zeros_like(lattice)
@@ -70,7 +76,8 @@ def CClabel(lattice):
             if labelled[i][j] == 0:
                 labelled[i][j] = label
                 todolist.append((i, j))
-                
+                # Pop spin site coordinates out of the to-do list and add
+                # them to the cluster, repeating til empty.
                 while todolist:
                     site = todolist.pop(0)
                     neighbours = getNeighbours(N, *site)
@@ -87,7 +94,9 @@ def CClabel(lattice):
 
 def domain_size(lattice, plot=False):
     """
-    Returns the Largest Cluster Size
+    Function which returns the largest cluster size for a given
+    lattice. The boolean parameter 'plot' also can be set to 
+    True to plot a colourmap grid of the lattice group by domain size.
     """
     N = len(lattice)
     labels = CClabel(lattice)
@@ -109,6 +118,16 @@ def domain_size(lattice, plot=False):
 
 def burn(N, nsites, lattice, T, nburn):
     """
+    Function which iterates the Metropolis algorithm
+    to `burn-in' the lattice to reach equilibrium.
+    -----------------------------
+    Parameters
+    -----------------------------
+    N :         Lattice size (i.e. N x N lattice)
+    nsites :    Number of sites on the lattice (i.e. N^2)
+    lattice :   N x N numpy array of +1 or -1 values
+    T :         Temperature
+    nburn :     Number of iterations to reach equilibrium
     """
     # Generate random coordinates/test values
     random_site = np.random.randint(N, size=(nburn*nsites, 2))
@@ -121,9 +140,28 @@ def burn(N, nsites, lattice, T, nburn):
             lattice[i][j] = -lattice[i][j]
 
 
-def main(N=64, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
+def main(N=8, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
     """
-    Implements the metropolis algorithm and saves data to file
+    Function which implements the Metropolis algorithm and saves
+    the following observables in a .txt file under the name 
+    'N<lattice size>.txt' (e.g. N8.txt for an 8 x 8 lattice):
+        - Temperature
+        - Absolute Magnetisation
+        - Energy
+        - Susceptibility
+        - Heat capcity
+        - Largest Domain Size
+    The above are all intensive quantites (i.e. per spin), and can 
+    be loaded using numpy.loadtxt into other scripts as a numpy array 
+    (and subsequently indexed for the relevant observables).
+    -----------------------------
+    Parameters
+    -----------------------------
+    N :             Lattice size (i.e. N x N lattice)
+    ntimesteps :    Number of time steps (i.e. sweeps of the lattice)
+    Tmin :          Minimum temperature bound
+    Tmax :          Maximum temperature bound
+    ntemp :         Number of intervals in the temperature loop.
     """
     nsites = N * N
     total_steps = ntimesteps * nsites
@@ -140,8 +178,6 @@ def main(N=64, ntimesteps=10**4, Tmin=1, Tmax=5, ntemp=50):
 
     # Initialisation of lattice
     lattice = np.random.choice([+1, -1], size=(N, N))
-    
-    burn(N, nsites, lattice, T=Tmin, nburn=1000)
     
     temp_ind = 0        # temperature loop array indexing integer
     
