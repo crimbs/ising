@@ -1,6 +1,6 @@
 ## The Ising Model of a Ferromagnet
 
-### Background
+#### Background
 In his 1924 PhD thesis, Ising erroneously predicted – based on his
 investigation into the one-dimensional model – that there were no phase
 transitions for any lattice dimension *d* with temperature *T* \> 0.
@@ -10,12 +10,12 @@ proof for the two-dimensional Ising model, containing his analytical
 result for the critical temperature for an infinite lattice
 $$\\frac{k\_{B} T\_{c}}{J} = \\frac{2}{\\ln(1+\\sqrt{2})} = 2.269185\\ldots$$
 
-### Definition of the Ising Model
+#### Definition of the Ising Model
 Consider *N* × *N* sites on a two-dimensional square lattice where each
 site is occupied by a spin *s*<sub>*i*</sub> =  ± 1 where the positive
 and negative correspond to spin-up and spin-down respectively. The
 energy of the system is then given by
-$$E = -J \\sum\_{\\expval{i,j}} s\_{i} s\_{j} - \\mu H \\sum\_{i=1}^{N^2} s\_{i}$$
+$E = -J \\sum\_{\\expval{i,j}} s\_{i} s\_{j} - \\mu H \\sum\_{i=1}^{N^2} s\_{i}$
 Here $\\expval{i,j}$ runs over the nearest-neighbours, *J* is the
 exchange energy, *μ* is the magnetic moment and *H* is the external
 field. The regime where *J* \> 0 corresponds to ferromagnetism, since
