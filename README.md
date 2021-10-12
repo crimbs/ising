@@ -15,7 +15,7 @@ Consider *N* × *N* sites on a two-dimensional square lattice where each
 site is occupied by a spin *s*<sub>*i*</sub> =  ± 1 where the positive
 and negative correspond to spin-up and spin-down respectively. The
 energy of the system is then given by
-$E = -J \\sum\_{\\expval{i,j}} s\_{i} s\_{j} - \\mu H \\sum\_{i=1}^{N^2} s\_{i}$
+![alt text](img/ising-equation.png)
 Here $\\expval{i,j}$ runs over the nearest-neighbours, *J* is the
 exchange energy, *μ* is the magnetic moment and *H* is the external
 field. The regime where *J* \> 0 corresponds to ferromagnetism, since
