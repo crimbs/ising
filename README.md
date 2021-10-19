@@ -7,5 +7,3 @@ In his 1924 PhD thesis, Ising erroneously predicted - based on his investigation
 ### Summary
 
 The investigation involved writing a Python program to implement the Metropolis algorithm for the two-dimensional Ising model. Various properties of the model were obtained using computational methods and compared with the theoretical expectations. In particular; autocorrelation, statistical error, hysteresis, response functions, finite-size scaling, domain size, and finally comparing the Metropolis algorithm to Wolff's cluster-flipping algorithm.
-
-See https://en.wikipedia.org/wiki/Ising_model for more detail about the Ising model.
