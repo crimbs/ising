@@ -78,3 +78,5 @@ plt.plot(T2[0], T2[1])
 plt.plot(T2[0], np.flip(T2[2]))
 plt.xlabel('$H$')
 plt.ylabel('$M$')
+
+plt.show()
